@@ -1,9 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_compass"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CompassActivity">
+    android:paddingLeft="0px"
+    android:paddingRight="0px"
+    android:paddingTop="0px"
+    android:paddingBottom="0px"
+    tools:context="com.example.myfirstapp.CompassActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:textSize="40sp"
+        android:textColor="#000"
+        android:textStyle="bold"
+        android:text="0°"
+        android:id="@+id/txt_azimuth"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/compass"
+        android:layout_below="@+id/txt_azimuth"
+        android:id="@+id/img_compass"/>
+</RelativeLayout>
