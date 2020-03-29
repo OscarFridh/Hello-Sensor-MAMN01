@@ -1,6 +1,7 @@
 package com.example.myfirstapp;
 
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
@@ -29,6 +30,8 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         compass_img = (ImageView) findViewById(R.id.img_compass);
         txt_compass = (TextView) findViewById(R.id.txt_azimuth);
         backgroundView = findViewById(R.id.activity_compass).getRootView();
+
+        backgroundView.setBackgroundColor(Color.argb(255, 0, 0, 0));
     }
 
     @Override
@@ -36,13 +39,29 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         compass_img.setRotation((float)-azimuth);
         txt_compass.setText(Math.round(azimuth) + "° " + heading(azimuth));
 
-        if (headingNorth(azimuth)) {
-            backgroundView.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
-            txt_compass.setTextColor(getResources().getColor(android.R.color.white));
-        } else {
-            backgroundView.setBackgroundColor(getResources().getColor(android.R.color.white));
-            txt_compass.setTextColor(getResources().getColor(android.R.color.black));
+        float fraction = (float)headingNorth(azimuth);
+
+        int backgroundColor = interpolateColor(getResources().getColor(android.R.color.white), getResources().getColor(android.R.color.holo_red_dark), fraction);
+        int textColor = interpolateColor(getResources().getColor(android.R.color.black), getResources().getColor(android.R.color.white), fraction);
+
+        backgroundView.setBackgroundColor(backgroundColor);
+        txt_compass.setTextColor(textColor);
+    }
+
+    private float interpolate(float a, float b, float proportion) {
+        return (a + ((b - a) * proportion));
+    }
+
+    /** Returns an interpoloated color, between <code>a</code> and <code>b</code> */
+    private int interpolateColor(int a, int b, float proportion) {
+        float[] hsva = new float[3];
+        float[] hsvb = new float[3];
+        Color.colorToHSV(a, hsva);
+        Color.colorToHSV(b, hsvb);
+        for (int i = 0; i < 3; i++) {
+            hsvb[i] = interpolate(hsva[i], hsvb[i], proportion);
         }
+        return Color.HSVToColor(hsvb);
     }
 
     private String heading(double azimuth) {
@@ -65,8 +84,17 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         }
     }
 
-    private boolean headingNorth(double azimuth) {
-        return azimuth >= 345 || azimuth <= 15;
+    private double headingNorth(double azimuth) {
+
+        double threshold = 30.0;
+
+        // First map to a value between -1 and 1 based on threshold.
+        // Then clam it and scale it to -90 to 90
+        // Finally return the cosine of that value
+        double p = (Math.sin(Math.toRadians(azimuth)) > 0) ? azimuth / threshold : (azimuth - 360) / threshold;
+        p = Math.max(Math.min(p, 1), -1);
+        p *= 90;
+        return Math.cos(Math.toRadians(p));
     }
 
     @Override
