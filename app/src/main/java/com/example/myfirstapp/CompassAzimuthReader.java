@@ -5,16 +5,17 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import java.io.IOException;
+
 public class CompassAzimuthReader implements SensorEventListener {
 
-    int mAzimuth;
+    private int mAzimuth;
     private SensorManager mSensorManager;
     private CompassAzimuthReaderDelegate delegate;
 
     private Sensor mRotationV, mAccelerometer, mMagnetometer;
-    boolean haveSensor = false, haveSensor2 = false;
-    float[] rMat = new float[9];
-    float[] orientation = new float[3];
+    private float[] rMat = new float[9];
+    private float[] orientation = new float[3];
     private float[] mLastAccelerometer = new float[3];
     private float[] mLastMagnetometer = new float[3];
     private boolean mLastAccelerometerSet = false;
@@ -25,30 +26,35 @@ public class CompassAzimuthReader implements SensorEventListener {
         this.delegate = delegate;
     }
 
-    public boolean start() {
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) == null) {
-            if ((mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null) || (mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) == null)) {
-                return false;
-            } else {
-                mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-                mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-                haveSensor = mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
-                haveSensor2 = mSensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_UI);
-                return true;
-            }
-        } else {
-            mRotationV = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-            haveSensor = mSensorManager.registerListener(this, mRotationV, SensorManager.SENSOR_DELAY_UI);
-            return true;
+    public void start() throws IOException {
+        try {
+            mRotationV = registerSensor(Sensor.TYPE_ROTATION_VECTOR);
+        } catch (IOException e) {
+            mAccelerometer = registerSensor(Sensor.TYPE_ACCELEROMETER);
+            mMagnetometer = registerSensor(Sensor.TYPE_MAGNETIC_FIELD);
         }
     }
 
+    private Sensor registerSensor(int sensorType) throws IOException {
+        if (mSensorManager.getDefaultSensor(sensorType) == null) {
+            throw new IOException("Failed to get sensor of type: " + sensorType);
+        }
+        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        if(!mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)) {
+            throw new IOException("Failed to register listener for sensor of type: " + sensorType);
+        }
+        return sensor;
+    }
+
     public void stop() {
-        if (haveSensor) {
-            mSensorManager.unregisterListener(this, mRotationV);
-        } else {
-            mSensorManager.unregisterListener(this, mAccelerometer);
-            mSensorManager.unregisterListener(this, mMagnetometer);
+        unregisterListener(mRotationV);
+        unregisterListener(mAccelerometer);
+        unregisterListener(mMagnetometer);
+    }
+
+    private void unregisterListener(Sensor sensor) {
+        if (sensor != null) {
+            mSensorManager.unregisterListener(this, sensor);
         }
     }
 

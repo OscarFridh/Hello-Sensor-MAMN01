@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.IOException;
+
 public class CompassActivity extends AppCompatActivity implements CompassAzimuthReaderDelegate {
 
     private ImageView compass_img;
@@ -59,8 +61,10 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
 
     @Override
     protected void onResume() {
-        super.onResume();
-        if (!compassAzimuthReader.start()) {
+        try {
+            super.onResume();
+            compassAzimuthReader.start();
+        } catch (IOException e) {
             noSensorsAlert();
         }
     }
