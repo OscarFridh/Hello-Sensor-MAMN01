@@ -3,6 +3,7 @@ package com.example.myfirstapp;
 import android.content.DialogInterface;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,6 +16,8 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
 
     private ImageView compass_img;
     private TextView txt_compass;
+    private View backgroundView;
+
     private CompassAzimuthReader compassAzimuthReader;
 
     @Override
@@ -25,12 +28,21 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         compassAzimuthReader = new CompassAzimuthReader((SensorManager) getSystemService(SENSOR_SERVICE), this);
         compass_img = (ImageView) findViewById(R.id.img_compass);
         txt_compass = (TextView) findViewById(R.id.txt_azimuth);
+        backgroundView = findViewById(R.id.activity_compass).getRootView();
     }
 
     @Override
     public void updateCompass(double azimuth) {
         compass_img.setRotation((float)-azimuth);
         txt_compass.setText(Math.round(azimuth) + "° " + heading(azimuth));
+
+        if (headingNorth(azimuth)) {
+            backgroundView.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
+            txt_compass.setTextColor(getResources().getColor(android.R.color.white));
+        } else {
+            backgroundView.setBackgroundColor(getResources().getColor(android.R.color.white));
+            txt_compass.setTextColor(getResources().getColor(android.R.color.black));
+        }
     }
 
     private String heading(double azimuth) {
@@ -51,6 +63,10 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         } else {
             return "NE";
         }
+    }
+
+    private boolean headingNorth(double azimuth) {
+        return azimuth >= 345 || azimuth <= 15;
     }
 
     @Override
