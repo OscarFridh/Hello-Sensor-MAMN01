@@ -12,7 +12,6 @@ public class CompassAzimuthReader implements SensorEventListener {
     private double azimuth;
     private SensorManager sensorManager;
     private CompassAzimuthReaderDelegate delegate;
-
     private boolean ignoreRotationVector;
     private float lowPassFilterAlpha;
 
@@ -22,16 +21,11 @@ public class CompassAzimuthReader implements SensorEventListener {
 
     private float[] rotationMatrix = new float[9];
     private float[] orientation = new float[3];
-
-    private float RTmp[] = new float[9];
-    private float Rot[] = new float[9];
-    private float I[] = new float[9];
-    private float results[] = new float[3];
-
-    private float[] gravSensorVals;
-    private float[] magSensorVals;
-
-
+    private float[] RTmp = new float[9];
+    private float[] I = new float[9];
+    private float[] results = new float[3];
+    private float[] accelerometerValues;
+    private float[] magnetometerValues;
 
     public CompassAzimuthReader(SensorManager sensorManager, CompassAzimuthReaderDelegate delegate, boolean ignoreRotationVector, float lowPassFilterAlpha) {
         this.sensorManager = sensorManager;
@@ -91,23 +85,25 @@ public class CompassAzimuthReader implements SensorEventListener {
         }
 
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            gravSensorVals = lowPass(event.values.clone(), gravSensorVals);
+            accelerometerValues = lowPass(event.values.clone(), accelerometerValues);
         } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            magSensorVals = lowPass(event.values.clone(), magSensorVals);
+            magnetometerValues = lowPass(event.values.clone(), magnetometerValues);
         }
 
-        if (gravSensorVals != null && magSensorVals != null) {
-            SensorManager.getRotationMatrix(RTmp, I, gravSensorVals, magSensorVals);
-            SensorManager.remapCoordinateSystem(RTmp, SensorManager.AXIS_X, SensorManager.AXIS_MINUS_Y, Rot);
-            SensorManager.getOrientation(Rot, results);
+        if (accelerometerValues != null && magnetometerValues != null) {
+            SensorManager.getRotationMatrix(RTmp, I, accelerometerValues, magnetometerValues);
+            SensorManager.remapCoordinateSystem(RTmp, SensorManager.AXIS_X, SensorManager.AXIS_MINUS_Y, rotationMatrix);
+            SensorManager.getOrientation(rotationMatrix, results);
             azimuth = (((results[0]*180)/Math.PI)+180);
         }
     }
 
     private float[] lowPass( float[] input, float[] output ) {
-        if ( output == null ) return input;
+        if (output == null) {
+            return input;
+        }
 
-        for ( int i=0; i<input.length; i++ ) {
+        for (int i=0; i<input.length; i++) {
             output[i] = output[i] + lowPassFilterAlpha * (input[i] - output[i]);
         }
         return output;
