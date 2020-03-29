@@ -22,7 +22,7 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compass);
 
-        compassAzimuthReader = new CompassAzimuthReader((SensorManager) getSystemService(SENSOR_SERVICE), this);
+        compassAzimuthReader = new CompassAzimuthReader((SensorManager) getSystemService(SENSOR_SERVICE), this, false);
         compass_img = (ImageView) findViewById(R.id.img_compass);
         txt_compass = (TextView) findViewById(R.id.txt_azimuth);
     }

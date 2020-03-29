@@ -13,6 +13,8 @@ public class CompassAzimuthReader implements SensorEventListener {
     private SensorManager sensorManager;
     private CompassAzimuthReaderDelegate delegate;
 
+    private boolean ignoreRotationVector;
+
     private Sensor rotationVectorSensor;
     private Sensor accelerometerSensor;
     private Sensor magnetometerSensor;
@@ -23,13 +25,17 @@ public class CompassAzimuthReader implements SensorEventListener {
     private float[] lastAccelerometer = new float[3];
     private float[] lastMagnetometer = new float[3];
 
-    public CompassAzimuthReader(SensorManager sensorManager, CompassAzimuthReaderDelegate delegate) {
+    public CompassAzimuthReader(SensorManager sensorManager, CompassAzimuthReaderDelegate delegate, boolean ignoreRotationVector) {
         this.sensorManager = sensorManager;
         this.delegate = delegate;
+        this.ignoreRotationVector = ignoreRotationVector;
     }
 
     public void start() throws IOException {
         try {
+            if (ignoreRotationVector) {
+                throw new IOException();
+            }
             rotationVectorSensor = registerSensor(Sensor.TYPE_ROTATION_VECTOR);
         } catch (IOException e) {
             accelerometerSensor = registerSensor(Sensor.TYPE_ACCELEROMETER);
@@ -41,7 +47,7 @@ public class CompassAzimuthReader implements SensorEventListener {
         if (sensorManager.getDefaultSensor(sensorType) == null) {
             throw new IOException("Failed to get sensor of type: " + sensorType);
         }
-        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        Sensor sensor = sensorManager.getDefaultSensor(sensorType);
         if(!sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)) {
             throw new IOException("Failed to register listener for sensor of type: " + sensorType);
         }
