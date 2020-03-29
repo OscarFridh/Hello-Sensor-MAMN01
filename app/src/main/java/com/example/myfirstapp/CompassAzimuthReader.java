@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class CompassAzimuthReader implements SensorEventListener {
 
-    private int azimuth;
+    private double azimuth;
     private SensorManager sensorManager;
     private CompassAzimuthReaderDelegate delegate;
 
@@ -69,11 +69,19 @@ public class CompassAzimuthReader implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        updateAzimuth(event);
+        delegate.updateCompass(azimuth);
+    }
+
+    private void updateAzimuth(SensorEvent event) {
 
         if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
             SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
-            azimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rotationMatrix, orientation)[0]) + 360) % 360;
-        } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            azimuth = (Math.toDegrees(SensorManager.getOrientation(rotationMatrix, orientation)[0]) + 360) % 360;
+            return;
+        }
+
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.length);
         } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.length);
@@ -82,11 +90,8 @@ public class CompassAzimuthReader implements SensorEventListener {
         if (lastAccelerometer != null && lastMagnetometer != null) {
             SensorManager.getRotationMatrix(rotationMatrix, null, lastAccelerometer, lastMagnetometer);
             SensorManager.getOrientation(rotationMatrix, orientation);
-            azimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rotationMatrix, orientation)[0]) + 360) % 360;
+            azimuth = (Math.toDegrees(SensorManager.getOrientation(rotationMatrix, orientation)[0]) + 360) % 360;
         }
-
-        azimuth = Math.round(azimuth);
-        delegate.updateCompass(azimuth);
     }
 
     @Override

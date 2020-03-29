@@ -28,25 +28,25 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
     }
 
     @Override
-    public void updateCompass(int mAzimuth) {
-        compass_img.setRotation(-mAzimuth);
-        txt_compass.setText(mAzimuth + "° " + heading(mAzimuth));
+    public void updateCompass(double azimuth) {
+        compass_img.setRotation((float)-azimuth);
+        txt_compass.setText(Math.round(azimuth) + "° " + heading(azimuth));
     }
 
-    private String heading(int mAzimuth) {
-        if (mAzimuth >= 350 || mAzimuth <= 10) {
+    private String heading(double azimuth) {
+        if (azimuth >= 350 || azimuth <= 10) {
             return "N";
-        } else if (mAzimuth < 350 && mAzimuth > 280) {
+        } else if (azimuth < 350 && azimuth > 280) {
             return "NW";
-        } else if (mAzimuth <= 280 && mAzimuth > 260) {
+        } else if (azimuth <= 280 && azimuth > 260) {
             return "W";
-        } else if (mAzimuth <= 260 && mAzimuth > 190) {
+        } else if (azimuth <= 260 && azimuth > 190) {
             return "SW";
-        } else if (mAzimuth <= 190 && mAzimuth > 170) {
+        } else if (azimuth <= 190 && azimuth > 170) {
             return "S";
-        } else if (mAzimuth <= 170 && mAzimuth > 100) {
+        } else if (azimuth <= 170 && azimuth > 100) {
             return "SE";
-        } else if (mAzimuth <= 100 && mAzimuth > 80) {
+        } else if (azimuth <= 100 && azimuth > 80) {
             return "E";
         } else {
             return "NE";
