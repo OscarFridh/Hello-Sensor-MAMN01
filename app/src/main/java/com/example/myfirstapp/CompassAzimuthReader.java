@@ -12,8 +12,9 @@ public class CompassAzimuthReader implements SensorEventListener {
     private double azimuth;
     private SensorManager sensorManager;
     private CompassAzimuthReaderDelegate delegate;
-    private boolean ignoreRotationVector;
-    private float lowPassFilterAlpha;
+
+    private float lowPassFilterAlpha = 0.25f;
+    private boolean shouldFilter = true;
 
     private Sensor rotationVectorSensor;
     private Sensor accelerometerSensor;
@@ -27,18 +28,23 @@ public class CompassAzimuthReader implements SensorEventListener {
     private float[] accelerometerValues;
     private float[] magnetometerValues;
 
-    public CompassAzimuthReader(SensorManager sensorManager, CompassAzimuthReaderDelegate delegate, boolean ignoreRotationVector, float lowPassFilterAlpha) {
+    private float[] lastUnfilteredAccelerometerValues = new float[3];
+    private float[] lastUnfilteredMagnetometerValues = new float[3];
+
+    public CompassAzimuthReader(SensorManager sensorManager, CompassAzimuthReaderDelegate delegate) {
         this.sensorManager = sensorManager;
         this.delegate = delegate;
-        this.ignoreRotationVector = ignoreRotationVector;
-        this.lowPassFilterAlpha = lowPassFilterAlpha;
+    }
+
+    public void startAccelerometerAndMagnetometer(boolean filter, float alpha) throws IOException {
+        lowPassFilterAlpha = alpha;
+        shouldFilter = filter;
+        accelerometerSensor = registerSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometerSensor = registerSensor(Sensor.TYPE_MAGNETIC_FIELD);
     }
 
     public void start() throws IOException {
         try {
-            if (ignoreRotationVector) {
-                throw new IOException();
-            }
             rotationVectorSensor = registerSensor(Sensor.TYPE_ROTATION_VECTOR);
         } catch (IOException e) {
             accelerometerSensor = registerSensor(Sensor.TYPE_ACCELEROMETER);
@@ -78,23 +84,44 @@ public class CompassAzimuthReader implements SensorEventListener {
 
     private void updateAzimuth(SensorEvent event) {
 
+        // A) Rotation vector
+
         if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
             SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
             azimuth = (Math.toDegrees(SensorManager.getOrientation(rotationMatrix, orientation)[0]) + 360) % 360;
             return;
         }
 
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            accelerometerValues = lowPass(event.values.clone(), accelerometerValues);
-        } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            magnetometerValues = lowPass(event.values.clone(), magnetometerValues);
-        }
+        // B) Accelerometer and magnetometer
 
-        if (accelerometerValues != null && magnetometerValues != null) {
-            SensorManager.getRotationMatrix(RTmp, I, accelerometerValues, magnetometerValues);
-            SensorManager.remapCoordinateSystem(RTmp, SensorManager.AXIS_X, SensorManager.AXIS_MINUS_Y, rotationMatrix);
-            SensorManager.getOrientation(rotationMatrix, results);
-            azimuth = (((results[0]*180)/Math.PI)+180);
+        if (shouldFilter) {
+
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                accelerometerValues = lowPass(event.values.clone(), accelerometerValues);
+            } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                magnetometerValues = lowPass(event.values.clone(), magnetometerValues);
+            }
+
+            if (accelerometerValues != null && magnetometerValues != null) {
+                SensorManager.getRotationMatrix(RTmp, I, accelerometerValues, magnetometerValues);
+                SensorManager.remapCoordinateSystem(RTmp, SensorManager.AXIS_X, SensorManager.AXIS_MINUS_Y, rotationMatrix);
+                SensorManager.getOrientation(rotationMatrix, results);
+                azimuth = (((results[0]*180)/Math.PI)+180);
+            }
+
+        } else {
+
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                System.arraycopy(event.values, 0, lastUnfilteredAccelerometerValues, 0, event.values.length);
+            } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                System.arraycopy(event.values, 0, lastUnfilteredMagnetometerValues, 0, event.values.length);
+            }
+
+            if (lastUnfilteredAccelerometerValues != null && lastUnfilteredMagnetometerValues != null) {
+                SensorManager.getRotationMatrix(rotationMatrix, null, lastUnfilteredAccelerometerValues, lastUnfilteredMagnetometerValues);
+                SensorManager.getOrientation(rotationMatrix, orientation);
+                azimuth = (Math.toDegrees(SensorManager.getOrientation(rotationMatrix, orientation)[0]) + 360) % 360;
+            }
         }
     }
 

@@ -22,7 +22,7 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compass);
 
-        compassAzimuthReader = new CompassAzimuthReader((SensorManager) getSystemService(SENSOR_SERVICE), this, true, 0.125f);
+        compassAzimuthReader = new CompassAzimuthReader((SensorManager) getSystemService(SENSOR_SERVICE), this);
         compass_img = (ImageView) findViewById(R.id.img_compass);
         txt_compass = (TextView) findViewById(R.id.txt_azimuth);
     }
@@ -63,7 +63,13 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
     protected void onResume() {
         try {
             super.onResume();
+
             compassAzimuthReader.start();
+
+            // Use these instead for a custom low pass filter:
+            //compassAzimuthReader.startAccelerometerAndMagnetometer(true, 0.125f); // Low pass filter
+            //compassAzimuthReader.startAccelerometerAndMagnetometer(false, 0f); // No filter
+
         } catch (IOException e) {
             noSensorsAlert();
         }
