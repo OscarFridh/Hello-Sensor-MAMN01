@@ -22,8 +22,6 @@ public class CompassAzimuthReader implements SensorEventListener {
 
     private float[] lastAccelerometer = new float[3];
     private float[] lastMagnetometer = new float[3];
-    private boolean lastAccelerometerSet = false;
-    private boolean lastMagnetometerSet = false;
 
     public CompassAzimuthReader(SensorManager sensorManager, CompassAzimuthReaderDelegate delegate) {
         this.sensorManager = sensorManager;
@@ -65,19 +63,17 @@ public class CompassAzimuthReader implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+
         if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
             SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
             azimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rotationMatrix, orientation)[0]) + 360) % 360;
-        }
-
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.length);
-            lastAccelerometerSet = true;
         } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.length);
-            lastMagnetometerSet = true;
         }
-        if (lastAccelerometerSet && lastMagnetometerSet) {
+
+        if (lastAccelerometer != null && lastMagnetometer != null) {
             SensorManager.getRotationMatrix(rotationMatrix, null, lastAccelerometer, lastMagnetometer);
             SensorManager.getOrientation(rotationMatrix, orientation);
             azimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rotationMatrix, orientation)[0]) + 360) % 360;
