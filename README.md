@@ -45,5 +45,7 @@ Då kompassen pekar mot norr ändras brakgrundsfärgen till röd. Detta sker gra
 Kod för att interpolera mellan två färger kopierades och klistrades in från Mark Renouf's svar på
 [Stackoverflow](https://stackoverflow.com/questions/4414673/android-color-between-two-colors-based-on-percentage)
 
+[Se commit](https://github.com/OscarFridh/Hello-Sensor-MAMN01/commit/0590a59c67c5e9b0272676ea5f1ba09999ce97da)
+
 ### Accelerometer
 Kod utgick ifrån kompass delen, som redan hade skrivits med liknande kod för att läsa av sensorer.
