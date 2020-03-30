@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,17 +15,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    /** Called when the user taps the Send button */
-    public void sendMessage(View view) {
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
-        EditText editText = (EditText) findViewById(R.id.editText);
-        String message = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE, message);
-        startActivity(intent);
-    }
-
     /** Called when the user taps the Compass button */
     public void showCompass(View view) {
         startActivity(new Intent(this, CompassActivity.class));
     }
+
+    /** Called when the user taps the Accelerometers button */
+    public void showAccelerometers(View view) {
+        startActivity(new Intent(this, AccelerometersActivity.class));
+    }
+
 }
