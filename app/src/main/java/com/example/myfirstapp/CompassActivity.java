@@ -1,9 +1,12 @@
 package com.example.myfirstapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,12 +24,16 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
 
     private CompassAzimuthReader compassAzimuthReader;
 
+    Vibrator vibrator;
+    private boolean isVibrating = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compass);
 
         compassAzimuthReader = new CompassAzimuthReader((SensorManager) getSystemService(SENSOR_SERVICE), this);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         imageView = (ImageView) findViewById(R.id.img_compass);
         textView = (TextView) findViewById(R.id.txt_azimuth);
@@ -38,13 +45,17 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         imageView.setRotation((float)-azimuth);
         textView.setText(Math.round(azimuth) + "° " + heading(azimuth));
 
-        float fraction = (float)headingNorth(azimuth);
-
+        float fraction = (float) headingNorthProgress(azimuth);
         int backgroundColor = interpolateColor(getResources().getColor(android.R.color.white), getResources().getColor(android.R.color.holo_red_dark), fraction);
         int textColor = interpolateColor(getResources().getColor(android.R.color.black), getResources().getColor(android.R.color.white), fraction);
-
         backgroundView.setBackgroundColor(backgroundColor);
         textView.setTextColor(textColor);
+
+        if (headingNorth(azimuth)) {
+            startVibrating();
+        } else {
+            stopVibrating();
+        }
     }
 
     private float interpolate(float a, float b, float proportion) {
@@ -83,7 +94,30 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         }
     }
 
-    private double headingNorth(double azimuth) {
+    private boolean headingNorth(double azimuth) {
+        return (azimuth >= 350 || azimuth <= 10);
+    }
+
+    private void startVibrating() {
+
+        if (isVibrating) {
+            return;
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            long[] pattern = new long[]{0, 50, 100};
+            VibrationEffect vibrationEffect = VibrationEffect.createWaveform(pattern, 0);
+            vibrator.vibrate(vibrationEffect);
+            isVibrating = true;
+        }
+    }
+
+    private void stopVibrating() {
+        vibrator.cancel();
+        isVibrating = false;
+    }
+
+    private double headingNorthProgress(double azimuth) {
 
         double threshold = 30.0;
 
