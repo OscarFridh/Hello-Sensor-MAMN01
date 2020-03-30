@@ -15,8 +15,8 @@ import java.io.IOException;
 
 public class CompassActivity extends AppCompatActivity implements CompassAzimuthReaderDelegate {
 
-    private ImageView compass_img;
-    private TextView txt_compass;
+    private ImageView imageView;
+    private TextView textView;
     private View backgroundView;
 
     private CompassAzimuthReader compassAzimuthReader;
@@ -27,17 +27,16 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         setContentView(R.layout.activity_compass);
 
         compassAzimuthReader = new CompassAzimuthReader((SensorManager) getSystemService(SENSOR_SERVICE), this);
-        compass_img = (ImageView) findViewById(R.id.img_compass);
-        txt_compass = (TextView) findViewById(R.id.txt_azimuth);
-        backgroundView = findViewById(R.id.activity_compass).getRootView();
 
-        backgroundView.setBackgroundColor(Color.argb(255, 0, 0, 0));
+        imageView = (ImageView) findViewById(R.id.img_compass);
+        textView = (TextView) findViewById(R.id.txt_azimuth);
+        backgroundView = findViewById(R.id.activity_compass).getRootView();
     }
 
     @Override
     public void updateCompass(double azimuth) {
-        compass_img.setRotation((float)-azimuth);
-        txt_compass.setText(Math.round(azimuth) + "° " + heading(azimuth));
+        imageView.setRotation((float)-azimuth);
+        textView.setText(Math.round(azimuth) + "° " + heading(azimuth));
 
         float fraction = (float)headingNorth(azimuth);
 
@@ -45,7 +44,7 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
         int textColor = interpolateColor(getResources().getColor(android.R.color.black), getResources().getColor(android.R.color.white), fraction);
 
         backgroundView.setBackgroundColor(backgroundColor);
-        txt_compass.setTextColor(textColor);
+        textView.setTextColor(textColor);
     }
 
     private float interpolate(float a, float b, float proportion) {
