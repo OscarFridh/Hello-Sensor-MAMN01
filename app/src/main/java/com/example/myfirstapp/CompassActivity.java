@@ -87,8 +87,8 @@ public class CompassActivity extends AppCompatActivity implements CompassAzimuth
 
         double threshold = 30.0;
 
-        // First map to a value between -1 and 1 based on threshold.
-        // Then clam it and scale it to -90 to 90
+        // First map to a value between [-1, 1] based on threshold.
+        // Then clamp it and scale it to a value between [-90, 90]
         // Finally return the cosine of that value
         double p = (Math.sin(Math.toRadians(azimuth)) > 0) ? azimuth / threshold : (azimuth - 360) / threshold;
         p = Math.max(Math.min(p, 1), -1);
