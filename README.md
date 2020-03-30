@@ -47,5 +47,12 @@ Kod för att interpolera mellan två färger kopierades och klistrades in från 
 
 [Se commit](https://github.com/OscarFridh/Hello-Sensor-MAMN01/commit/0590a59c67c5e9b0272676ea5f1ba09999ce97da)
 
+#### Haptics
+
+När kompassen pekar mot norr, så vibrerar telefonen snabbt.
+Kod inspirerad av [en artikel](https://proandroiddev.com/using-vibrate-in-android-b0e3ef5d5e07).
+
+[Se commit](https://github.com/OscarFridh/Hello-Sensor-MAMN01/commit/ee5b07b4b6cb1db38198946c9325017116847a79)
+
 ### Accelerometer
 Kod utgick ifrån kompass delen, som redan hade skrivits med liknande kod för att läsa av sensorer.
