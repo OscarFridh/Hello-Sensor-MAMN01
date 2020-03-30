@@ -15,6 +15,7 @@ För att dölja komplexiteten av att läsa från olika sensorer kapslades den de
 
 Utvidningar:
 * Filtrering av accelerometer och magnetometer värden (inspirerat av [Lågpassfiltrering av sensorer](https://www.built.io/blog/applying-low-pass-filter-to-android-sensor-s-readings))
+ - test
 * Ändra bakgrundsfärger när kompassen pekar mot norr (kod från [Mark Renouf's svar på Stackoverflow](https://stackoverflow.com/questions/4414673/android-color-between-two-colors-based-on-percentage))
 
 ### Accelerometer
